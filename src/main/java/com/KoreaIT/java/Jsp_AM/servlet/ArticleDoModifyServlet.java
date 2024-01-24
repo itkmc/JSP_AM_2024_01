@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Map;
 
+import com.KoreaIT.java.Jsp_AM.config.Config;
 import com.KoreaIT.java.Jsp_AM.util.DBUtil;
 import com.KoreaIT.java.Jsp_AM.util.SecSql;
 
@@ -14,44 +16,35 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet("/article/doModify")
-public class ArticleDoModifyServlet extends HttpServlet {
+@WebServlet("/article/modify")
+public class ArticleModifyServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		response.setContentType("text/html;charset=UTF-8");
 		// DB연결
 		try {
-			Class.forName("com.mysql.jdbc.Driver");
+			Class.forName(Config.getDbDriverClassName());
 		} catch (ClassNotFoundException e) {
 			System.out.println("클래스가 없습니다.");
 			e.printStackTrace();
 		}
 
-		String url = "jdbc:mysql://127.0.0.1:3306/JSP_AM?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul&useOldAliasMetadataBehavior=true&zeroDateTimeNehavior=convertToNull";
-		String user = "root";
-		String password = "";
-
 		Connection conn = null;
 
 		try {
-			conn = DriverManager.getConnection(url, user, password);
+			conn = DriverManager.getConnection(Config.getDbUrl(), Config.getDbUser(), Config.getDbPw());
 
 			int id = Integer.parseInt(request.getParameter("id"));
 
-			String title = request.getParameter("title");
-			String body = request.getParameter("body");
-
-			SecSql sql = SecSql.from("UPDATE article");
-			sql.append("SET ");
-			sql.append("title = ?,", title);
-			sql.append("`body` = ?", body);
+			SecSql sql = SecSql.from("SELECT *");
+			sql.append("FROM article");
 			sql.append("WHERE id = ?;", id);
 
-			DBUtil.update(conn, sql);
+			Map<String, Object> articleRow = DBUtil.selectRow(conn, sql);
 
-			response.getWriter().append(String
-					.format("<script>alert('%d번 글이 수정되었습니다.'); location.replace('detail?id=%d');</script>", id, id));
+			request.setAttribute("articleRow", articleRow);
+			request.getRequestDispatcher("/jsp/article/modify.jsp").forward(request, response);
 
 		} catch (SQLException e) {
 			System.out.println("에러 : " + e);
@@ -70,4 +63,5 @@ public class ArticleDoModifyServlet extends HttpServlet {
 			throws ServletException, IOException {
 		doGet(request, response);
 	}
+
 }
