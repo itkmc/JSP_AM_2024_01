@@ -1,6 +1,7 @@
 <%@ page import="java.util.Map"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -38,6 +39,11 @@
 
 			if (loginId.length == 0) {
 				alert('아이디를 입력해주세요');
+				form.loginId.focus();
+				return;
+			}
+			if (loginId == "loginId") {
+				alert('이미 있는 아이디 입니다');
 				form.loginId.focus();
 				return;
 			}
