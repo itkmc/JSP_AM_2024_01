@@ -15,6 +15,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @WebServlet("/article/doModify")
 public class ArticleDoModifyServlet extends HttpServlet {
@@ -34,7 +35,7 @@ public class ArticleDoModifyServlet extends HttpServlet {
 
 		try {
 			conn = DriverManager.getConnection(Config.getDbUrl(), Config.getDbUser(), Config.getDbPw());
-
+	
 			int id = Integer.parseInt(request.getParameter("id"));
 
 			String title = request.getParameter("title");
@@ -47,6 +48,14 @@ public class ArticleDoModifyServlet extends HttpServlet {
 			sql.append("WHERE id = ?;", id);
 
 			DBUtil.update(conn, sql);
+			
+			HttpSession session = request.getSession();
+			String loginId = (String)session.getAttribute("loginedMemberLoginId");
+			
+			if (loginId.equals(id)) {
+				response.getWriter().append(
+						String.format("<script>alert('아이디가 달라'); location.replace('../member/login');</script>"));
+			}
 
 			response.getWriter().append(String
 					.format("<script>alert('%d번 글이 수정되었습니다.'); location.replace('detail?id=%d');</script>", id, id));
